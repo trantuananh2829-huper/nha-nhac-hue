@@ -24,7 +24,7 @@ node serve-local.js <thư-mục>  # phục vụ thư mục khác
 
 ## Nhạc nền
 
-Repo không kèm file nhạc. Để bật nhạc, đặt một file MP3 vào `assets/audio/nha-nhac.mp3` (đúng tên này); nút loa ở góc trên phải sẽ phát lặp kèm fade in/out. Khi chưa có file, nút vẫn hiện nhưng mờ và không phát gì.
+Nhạc nền nằm ở `assets/audio/nha-nhac.mp3` (phát lặp, fade in/out khi bật/tắt). Muốn đổi bản khác thì ghi đè file cùng tên; nếu xoá file, nút loa vẫn hiện nhưng mờ và không phát gì. Trình duyệt chỉ cho phát sau khi người xem bấm nút — đây là quy định autoplay của trình duyệt, không phải lỗi trang.
 
 ## Ghi chú
 

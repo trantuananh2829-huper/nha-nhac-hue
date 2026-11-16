@@ -1,9 +1,6 @@
 # ảnh gốc dùng để dựng slide (bản chạy web nằm trong assets/img)
 photos/
 
-# nhạc nền không kèm trong repo — xem mục "Nhạc nền" trong README
-assets/audio/*.mp3
-
 # công cụ tải về để dùng một lần (GitHub CLI portable)
 tools/
 
