@@ -116,18 +116,22 @@
     const barEl = holder.querySelector('.player__bar i');
     let fadeTimer = 0;
 
-    const clock = (seconds) => {
+    // thời gian đã phát làm tròn xuống, tổng thời lượng làm tròn gần nhất (29.99s → 0:30)
+    const clock = (seconds, round) => {
       if (!Number.isFinite(seconds)) return '0:00';
-      return `${Math.floor(seconds / 60)}:${String(Math.floor(seconds % 60)).padStart(2, '0')}`;
+      const total = round ? Math.round(seconds) : Math.floor(seconds);
+      return `${Math.floor(total / 60)}:${String(total % 60).padStart(2, '0')}`;
     };
 
     const renderTime = () => {
-      timeEl.textContent = `${clock(audio.currentTime)} / ${clock(audio.duration)}`;
+      timeEl.textContent = `${clock(audio.currentTime)} / ${clock(audio.duration, true)}`;
       barEl.style.width = audio.duration ? `${(audio.currentTime / audio.duration) * 100}%` : '0%';
     };
 
     audio.addEventListener('timeupdate', renderTime);
     audio.addEventListener('loadedmetadata', renderTime);
+    // bản không lặp: hết bài thì nút tự trả về trạng thái tắt
+    audio.addEventListener('ended', () => setState(false));
 
     // timer, not requestAnimationFrame: browsers throttle rAF in background tabs,
     // which would leave the volume stuck at zero while the music plays
