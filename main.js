@@ -111,7 +111,23 @@
 
   function createPlayer(button) {
     const audio = document.getElementById(button.dataset.audio);
+    const holder = button.closest('.player');
+    const timeEl = holder.querySelector('.player__time');
+    const barEl = holder.querySelector('.player__bar i');
     let fadeTimer = 0;
+
+    const clock = (seconds) => {
+      if (!Number.isFinite(seconds)) return '0:00';
+      return `${Math.floor(seconds / 60)}:${String(Math.floor(seconds % 60)).padStart(2, '0')}`;
+    };
+
+    const renderTime = () => {
+      timeEl.textContent = `${clock(audio.currentTime)} / ${clock(audio.duration)}`;
+      barEl.style.width = audio.duration ? `${(audio.currentTime / audio.duration) * 100}%` : '0%';
+    };
+
+    audio.addEventListener('timeupdate', renderTime);
+    audio.addEventListener('loadedmetadata', renderTime);
 
     // timer, not requestAnimationFrame: browsers throttle rAF in background tabs,
     // which would leave the volume stuck at zero while the music plays
@@ -141,6 +157,7 @@
     const setState = (playing) => {
       button.setAttribute('aria-pressed', String(playing));
       button.setAttribute('aria-label', playing ? button.dataset.labelOn : button.dataset.labelOff);
+      holder.classList.toggle('is-playing', playing);
     };
 
     const noTrack = () => {
