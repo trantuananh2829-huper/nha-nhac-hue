@@ -24,7 +24,14 @@ node serve-local.js <thư-mục>  # phục vụ thư mục khác
 
 ## Nhạc nền
 
-Nhạc nền nằm ở `assets/audio/nha-nhac.mp3` (phát lặp, fade in/out khi bật/tắt). Muốn đổi bản khác thì ghi đè file cùng tên; nếu xoá file, nút loa vẫn hiện nhưng mờ và không phát gì. Trình duyệt chỉ cho phát sau khi người xem bấm nút — đây là quy định autoplay của trình duyệt, không phải lỗi trang.
+Có hai bản nhạc, mỗi bản một nút loa ở góc trên phải; bật bản này thì bản kia tự fade ra. Cả hai đều fade in/out khi bật/tắt.
+
+| Nút | File | Kiểu phát |
+| --- | --- | --- |
+| loa | `assets/audio/nha-nhac.mp3` | phát hết bài rồi dừng |
+| nốt nhạc | `assets/audio/nhac-nen.mp3` | phát lặp (loop) |
+
+Muốn đổi bản khác thì ghi đè file cùng tên; nếu thiếu file, nút vẫn hiện nhưng mờ và không phát gì. Trình duyệt chỉ cho phát sau khi người xem bấm nút — đây là quy định autoplay của trình duyệt, không phải lỗi trang.
 
 ## Ghi chú
 

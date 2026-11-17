@@ -4,8 +4,6 @@
 
   const slides = Array.from(document.querySelectorAll('.slide'));
   const autoBtn = document.querySelector('.auto');
-  const soundBtn = document.querySelector('.sound');
-  const bgm = document.getElementById('bgm');
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
   const STEP_MS = 7000;
 
@@ -106,68 +104,84 @@
   });
   window.addEventListener('blur', stop);
 
-  /* ————— background music, faded in and out ————— */
+  /* ————— background music: one toggle per track, faded in and out ————— */
   const VOLUME = 0.55;
   const FADE_MS = reduceMotion.matches ? 0 : 900;
-  let fadeTimer = 0;
+  const players = [];
 
-  // timer, not requestAnimationFrame: browsers throttle rAF in background tabs,
-  // which would leave the volume stuck at zero while the music plays
-  const fadeTo = (target) => new Promise((resolve) => {
-    clearInterval(fadeTimer);
+  function createPlayer(button) {
+    const audio = document.getElementById(button.dataset.audio);
+    let fadeTimer = 0;
 
-    if (!FADE_MS) {
-      bgm.volume = target;
-      resolve();
-      return;
-    }
+    // timer, not requestAnimationFrame: browsers throttle rAF in background tabs,
+    // which would leave the volume stuck at zero while the music plays
+    const fadeTo = (target) => new Promise((resolve) => {
+      clearInterval(fadeTimer);
 
-    const from = bgm.volume;
-    const startedAt = performance.now();
-
-    fadeTimer = setInterval(() => {
-      const k = Math.min(1, (performance.now() - startedAt) / FADE_MS);
-      bgm.volume = from + (target - from) * k;
-      if (k === 1) {
-        clearInterval(fadeTimer);
-        fadeTimer = 0;
+      if (!FADE_MS) {
+        audio.volume = target;
         resolve();
+        return;
       }
-    }, 40);
-  });
 
-  const soundState = (playing) => {
-    soundBtn.setAttribute('aria-pressed', String(playing));
-    soundBtn.setAttribute('aria-label', playing ? 'Tắt nhạc nền' : 'Bật nhạc nền');
-  };
+      const from = audio.volume;
+      const startedAt = performance.now();
 
-  const noTrack = () => {
-    bgm.volume = VOLUME;
-    soundBtn.classList.add('is-missing');
-    soundBtn.title = 'Chưa có tệp nhạc — thêm assets/audio/nha-nhac.mp3';
-    soundState(false);
-  };
+      fadeTimer = setInterval(() => {
+        const k = Math.min(1, (performance.now() - startedAt) / FADE_MS);
+        audio.volume = from + (target - from) * k;
+        if (k === 1) {
+          clearInterval(fadeTimer);
+          fadeTimer = 0;
+          resolve();
+        }
+      }, 40);
+    });
 
-  bgm.volume = VOLUME;
-  bgm.addEventListener('error', noTrack);
+    const setState = (playing) => {
+      button.setAttribute('aria-pressed', String(playing));
+      button.setAttribute('aria-label', playing ? button.dataset.labelOn : button.dataset.labelOff);
+    };
 
-  soundBtn.addEventListener('click', async () => {
-    if (!bgm.paused) {
-      soundState(false);
-      await fadeTo(0);
-      bgm.pause();
-      return;
-    }
+    const noTrack = () => {
+      audio.volume = VOLUME;
+      button.classList.add('is-missing');
+      button.title = `Chưa có tệp nhạc — thêm ${audio.getAttribute('src')}`;
+      setState(false);
+    };
 
-    bgm.volume = 0;
-    try {
-      await bgm.play();
-      soundState(true);
-      soundBtn.classList.remove('is-missing');
-      soundBtn.removeAttribute('title');
-      await fadeTo(VOLUME);
-    } catch (err) {
-      noTrack();
-    }
-  });
+    audio.volume = VOLUME;
+    audio.addEventListener('error', noTrack);
+
+    const player = {
+      async stop() {
+        if (audio.paused) return;
+        setState(false);
+        await fadeTo(0);
+        audio.pause();
+      },
+
+      async play() {
+        // only one track at a time: the others fade out while this one fades in
+        const fading = players.filter((other) => other !== player).map((other) => other.stop());
+
+        audio.volume = 0;
+        try {
+          await audio.play();
+          setState(true);
+          button.classList.remove('is-missing');
+          button.removeAttribute('title');
+          await fadeTo(VOLUME);
+        } catch (err) {
+          noTrack();
+        }
+        await Promise.all(fading);
+      }
+    };
+
+    button.addEventListener('click', () => (audio.paused ? player.play() : player.stop()));
+    return player;
+  }
+
+  document.querySelectorAll('[data-audio]').forEach((button) => players.push(createPlayer(button)));
 })();
